@@ -1,45 +1,54 @@
 """
-Сочетанием из n элементов по k называется подмножество этих n элементов размера k.
-Два сочетания называются различными, если одно из сочетаний содержит элемент, который не содержит другое.
-Числом сочетаний из n по k называется количество различных сочетаний из n по k. Обозначим это число за C(n, k).
+Реализуйте программу, которая будет эмулировать работу с пространствами имен. Необходимо реализовать поддержку создания пространств имен и добавление в них переменных.
 
-Пример:
-Пусть n = 3, т. е. есть три элемента (1, 2, 3). Пусть k = 2.
-Все различные сочетания из 3 элементов по 2: (1, 2), (1, 3), (2, 3).
-Различных сочетаний три, поэтому C(3, 2) = 3.
+В данной задаче у каждого пространства имен есть уникальный текстовый идентификатор – его имя.
 
-Несложно понять, что C(n, 0) = 1, так как из n элементов выбрать 0 можно единственным образом, а именно, ничего не выбрать.
-Также несложно понять, что если k > n, то C(n, k) = 0, так как невозможно, например, из трех элементов выбрать пять.
+Вашей программе на вход подаются следующие запросы:
 
-Для вычисления C(n, k) в других случаях используется следующая рекуррентная формула:
-C(n, k) = C(n - 1, k) + C(n - 1, k - 1).
+create <namespace> <parent> –  создать новое пространство имен с именем <namespace> внутри пространства <parent>
+add <namespace> <var> – добавить в пространство <namespace> переменную <var>
+get <namespace> <var> – получить имя пространства, из которого будет взята переменная <var> при запросе из пространства <namespace>, или None, если такого пространства не существует
+Рассмотрим набор запросов
 
-Реализуйте программу, которая для заданных n и k вычисляет C(n, k).
-
-Вашей программе на вход подается строка, содержащая два целых числа n и k (1 ≤ n ≤ 10, 0 ≤ k ≤ 10).
-Ваша программа должна вывести единственное число: C(n, k).
+add global a
+create foo global
+add foo b
+create bar foo
+add bar a
 """
 
 
-def factorial(n, k):
-    res_of_n_factorial = 1
-    for numbers_n in range(1, n + 1):
-        res_of_n_factorial *= numbers_n
+class Nmspc(list):
+    names = {"global": ["None"],"None":[]}
 
-    res_of_k_factorial = 1
-    for numbers_k in range(1, k + 1):
-        res_of_k_factorial *= numbers_k
+    def create(self, space, parent):
+        self.names[parent].append(space)
+        self.names[space] = [parent]
 
-    res_of_dif_factorial = 1
-    range_of_dif = n - k
-    for numbers_dif in range(1, range_of_dif + 1):
-        res_of_dif_factorial *= numbers_dif
+    def add(self, space, var):
+        self.names[space].append(var)
 
-    result = res_of_n_factorial / (res_of_k_factorial * res_of_dif_factorial)
-    print(int(result))
+    def get(self, space, var):
+        if space == "None":
+            return
+        if var in self.names[space]:
+            print(space)
+            return
+        elif self.names[space][0] != "None":
+            self.get(self.names[space][0], var)
+            return
+        else:
+            print("None")
+        return
 
 
-n, k = map(int, input().split())
-factorial(n, k)
-
-
+a = Nmspc()
+n = int(input())
+for i in range(n):
+    s = input().split()
+    if s[0] == "add":
+        a.add(s[1], s[2])
+    elif s[0] == "create":
+        a.create(s[1], s[2])
+    else:
+        a.get(s[1], s[2])
